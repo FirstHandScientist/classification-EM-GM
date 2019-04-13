@@ -23,22 +23,20 @@ To do test on:
 
 ## Usage Instruction:
 
-Train model with:
+### Train model with:
 
-'''
+
 $ python train.py <hparams> 
-'''
+
  
 If hparams.Mixture.naive = True in configuration file <hparams>, then GenMM is going to be trained. If hparams.naive is setting False, LatMM is going to be trained.
     
 Training example:
 
-'''
 $ python train.py hparams/LatMM/fashion-mnist5.json
-'''
 
-2. Classification performance evaluation:
 
-'''
-python mat_acc.py <hparams>
-'''
+### Classification performance evaluation:
+
+$ python mat_acc.py <hparams>
+
