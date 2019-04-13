@@ -61,5 +61,3 @@ def cat_feature(tensor_a, tensor_b):
 
 def pixels(tensor):
     return int(tensor.size(2) * tensor.size(3))
-def all_pixels(tensor):
-    return int(tensor.size(1) * tensor.size(2) * tensor.size(3))

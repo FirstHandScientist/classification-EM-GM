@@ -229,8 +229,6 @@ class InvertibleConv1x1(nn.Module):
             else:
                 weight = torch.inverse(self.weight.double()).float()\
                               .view(w_shape[0], w_shape[1], 1, 1)
-                # weight = torch.inverse(self.weight)\
-                #               .view(w_shape[0], w_shape[1], 1, 1)
             return weight, dlogdet
         else:
             self.p = self.p.to(input.device)
@@ -243,6 +241,8 @@ class InvertibleConv1x1(nn.Module):
             if not reverse:
                 w = torch.matmul(self.p, torch.matmul(l, u))
             else:
+                # l = l.inverse()
+                # u = u.inverse()
                 l = torch.inverse(l.double()).float()
                 u = torch.inverse(u.double()).float()
                 w = torch.matmul(u, torch.matmul(l, self.p.inverse()))
@@ -278,7 +278,6 @@ class GaussianDiag:
         #print("mean, logs, x:", mean.size(), logs.size(), x.size())
         
         lnL = -0.5 * (logs * 2. + ((x - mean) ** 2) / torch.exp(logs * 2.) + GaussianDiag.Log2PI)
-        
         return lnL
 
     @staticmethod
@@ -320,8 +319,6 @@ class Split2d(nn.Module):
             z1, z2 = thops.split_feature(input, "split")
             mean, logs = self.split2d_prior(z1)
             logdet = GaussianDiag.logp(mean, logs, z2) + logdet
-            # logdet = GaussianDiag.logp(mean, logs, z2) + logdet + Gamma.logp(alpha=torch.FloatTensor([1]).to(z2.device), beta=torch.FloatTensor([1]).to(z2.device), x=torch.exp(-logs), device=z2.device)
-
             return z1, logdet
         else:
             z1 = input

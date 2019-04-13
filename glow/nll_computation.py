@@ -35,7 +35,7 @@ class nll_computer(object):
         
         self.data_loader = dataset
         self.global_step = 0
-        self.pixel_scale = hparams.Data.pixel_scale        
+        
         
         
         # mixture setting
@@ -73,7 +73,7 @@ class nll_computer(object):
                 #     batch[k] = batch[k].to(self.data_device)
                 
                 # x = batch["x"]
-                x = batch.to(self.data_device) * self.pixel_scale
+                x = batch.to(self.data_device)
 
                 y = None
                 y_onehot = None
@@ -93,13 +93,13 @@ class nll_computer(object):
                     # tmp_sum = np.sum(real_p, axis=0)
                     # loss = np.mean( - np.log(tmp_sum + 1e-6) )
                     #######################exactly compute#################
-                    logp = logp * thops.pixels(x)
+                    logp = logp * thops.all_pixels(x)
                     min_logp = logp.mean(axis= 0)
                     delta_logp = logp - min_logp
                     delta_logp = delta_logp.astype(np.float128)
                     summand = np.exp(delta_logp) * self.graph.get_prior().numpy()[:,None].astype(np.float128)
                     log_sum = np.log(np.sum( summand, axis=0) )
-                    loss = np.mean(-log_sum - min_logp)/thops.pixels(x)
+                    loss = np.mean(-log_sum - min_logp)/thops.all_pixels(x)
                                     
                 tmp_nll_result += loss
                 # global step

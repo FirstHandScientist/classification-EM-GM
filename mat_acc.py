@@ -93,9 +93,7 @@ def testing(hparams):
     # step_batches = np.linspace(78*6,
     #                           hparams.Train.num_batches,
     #                           78*hparams.Train.em_gap)
-    # step_batches = np.arange(start=132, stop=132*12, step=132)
     step_batches = np.arange(start=0, stop=hparams.Train.n_epoches, step=hparams.Train.em_gap)
-
     # step_batches = [4290]
     accuracy_dict = {"test":[], "train":[]}
     # accuracy_dict = {"test":[]}
@@ -107,38 +105,19 @@ def testing(hparams):
         # net_name = "trained.pkg"
 
         for key, value in accuracy_dict.items():
-            if dataset == "cifar10":
-                transform = transforms.Compose([
-                    transforms.Resize(32),
-                    transforms.ToTensor(),
-                    transforms.Normalize((0.5,0.5,0.5), (1,1,1))
-                ])
-                dataset_ins = dset.CIFAR10(root=dataset_root, train=True if "train" == key else False,
-                               download=True,
-                               transform=transform)
-            elif dataset == "mnist":
-                transform = transforms.Compose([
-                    transforms.Resize(32),
-                    transforms.ToTensor(),
-                    transforms.Normalize((0.5,), (1,))
-                ])
-                dataset_ins = dset.MNIST(root=dataset_root, train=True if "train" == key else False,
-                               download=False,
-                               transform=transform)
-
-            data_loader = DataLoader(dataset_ins,
-                             batch_size=batch_size,
-                             #   num_workers=8,
-                             shuffle=True,
-                             drop_last=True)
+            #if dataset == "vowel":
+            data_x_y = load_obj(os.path.join(dataset_root,  "train_data" if key == "train" else "test_data"))
+            data_x = data_x_y[0]
+            data_y = data_x_y[1]
+                
             accuracy = 0
             myclassifer = load_classifier(net_name)
-            progress = tqdm(data_loader)
+            progress = tqdm(range(int(data_x.shape[0]/batch_size)))
             count = 0
-            for i_batch, batch in enumerate(progress):
+            for batch_i in progress:
 
-                x_testing = batch[0].to(hparams.Device.data) 
-                y_testing = batch[1].to(hparams.Device.data)
+                x_testing = data_x[batch_i*batch_size:(batch_i+1)*batch_size].to(hparams.Device.data) 
+                y_testing = data_y[batch_i*batch_size:(batch_i+1)*batch_size].to(hparams.Device.data)
 
                 prediction = []
                 for idx, the_classifier in enumerate(myclassifer):

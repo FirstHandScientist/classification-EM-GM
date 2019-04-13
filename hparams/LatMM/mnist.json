@@ -1,6 +1,6 @@
 {
     "Dir": {
-        "log_root": "results/mnist/k6hc128s1LatMM"
+        "log_root": "results/mnist/k6hc128LatMM"
     },
     "Glow" : {
         "image_shape": [32, 32, 1],
@@ -17,7 +17,7 @@
     },
     "Mixture" : {
         "naive": false,
-        "num_component": 1,
+        "num_component": 4,
         "regulate_std": true,
         "regulate_mulI": 0,
         "gam_alpha": 2,
@@ -52,9 +52,9 @@
         "data": "cuda:0"
     },
     "Train": {
-        "batch_size": 400,
+        "batch_size": 200,
         "num_batches": 4800,
-        "n_epoches": 401,
+        "n_epoches": 201,
         "max_grad_clip": 5,
         "max_grad_norm": 100,
         "max_checkpoints": 100,

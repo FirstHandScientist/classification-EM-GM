@@ -76,9 +76,6 @@ class FlowStep(nn.Module):
         # 2. permute
         z, logdet = FlowStep.FlowPermutation[self.flow_permutation](
             self, z, logdet, False)
-        # z, logdet = FlowStep.FlowPermutation[self.flow_permutation](
-        #     self, input, logdet, False)
-        
         # 3. coupling
         z1, z2 = thops.split_feature(z, "split")
         if self.flow_coupling == "additive":
@@ -90,8 +87,6 @@ class FlowStep(nn.Module):
             z2 = z2 + shift
             z2 = z2 * scale
             logdet = thops.sum(torch.log(scale), dim=[1, 2, 3]) + logdet
-            # if torch.sum(logdet>0)>0:
-            #     assert False, "[Model]: encounter negative logdet..."
         z = thops.cat_feature(z1, z2)
         return z, logdet
 
@@ -232,29 +227,32 @@ class Glow(nn.Module):
         return thops.split_feature(h, "split")
 
     def forward(self, x=None, y_onehot=None, z=None,
-                eps_std=None, reverse=False):
+                eps_std=None, reverse=False, prediction=False):
         if not reverse:
-            return self.normal_flow(x, y_onehot)
+            return self.normal_flow(x, y_onehot, prediction=prediction)
         else:
             return self.reverse_flow(z, y_onehot, eps_std)
 
-    def normal_flow(self, x, y_onehot):
-        pixels = thops.all_pixels(x)
-        z = x + torch.normal(mean=torch.zeros_like(x),
-                             std=torch.ones_like(x) * (1. / 256.))
-        logdet = torch.zeros_like(x[:, 0, 0, 0])
-        logdet += float(-np.log(256.) * pixels)
+    def normal_flow(self, x, y_onehot, prediction=False):
+        pixels = thops.pixels(x) * x.size(1)
+        if prediction:
+            z = x
+            logdet = torch.zeros_like(x[:, 0, 0, 0])
+            logdet += float(-np.log(256.) * pixels)
+        else:
+            z = x + torch.normal(mean=torch.zeros_like(x), std=torch.ones_like(x) * (1. / 256.)) * self.hparams.Data.quantity_noise
+
+            # z = x + (torch.FloatTensor(x.size()).uniform_()/256).to(self.hparams.Device.data)-1./512
+            logdet = torch.zeros_like(x[:, 0, 0, 0])
+            logdet += float(-np.log(256.) * pixels)
         # encode
         z, objective = self.flow(z, logdet=logdet, reverse=False)
         # prior
+        assert ((objective>0).sum()<1), "Make sure logdet is correct."
         mean, logs = self.prior(y_onehot)
         # in source mixture, the probability of z should be taken into account later.
         if self.naive_mode:
-            #objective += modules.GaussianDiag.logp(mean, logs, z)
-            objective += modules.GaussianDiag.logp(torch.zeros_like(z),
-                                                   torch.zeros_like(z),
-                                                   z)
-
+            objective += modules.GaussianDiag.logp(mean, logs, z)
                 
         if self.hparams.Glow.y_condition:
             y_logits = self.project_class(z.mean(2).mean(2))
@@ -441,19 +439,17 @@ class LatMM(nn.Module):
     def get_component(self):
         return self.graph
         
-    def forward(self, x=None, y_onehot=None, z=None, eps_std=None, reverse=False, idx=None, regulate_std=True):
+    def forward(self, x=None, y_onehot=None, z=None, eps_std=None, reverse=False, idx=None, regulate_std=True, prediction=False):
         # if not self.inited:
         #     self.initialize_parameters(z)
         if not reverse:
             # center and scale
-            pixels = thops.all_pixels(x)    
-            z, nlogdet, _ = self.graph(x=x, y_onehot=None, reverse=reverse)
+            pixels = thops.pixels(x) * x.size()[1]    
+            z, nlogdet, _ = self.graph(x=x, y_onehot=None, reverse=reverse, prediction=prediction)
 
             code, gaussian_logp = self.normal_flow(input=z)
             
-            #reg_prior = self.regulation_prior()/float(z.size(1)*thops.pixels(z))
-            reg_prior = self.regulation_prior()/float(z.size(1))
-
+            reg_prior = self.regulation_prior()/float(thops.pixels(z)*z.size()[1])
             gaussian_nlogp = -gaussian_logp/float(pixels)
             #############################################################
             return code, gaussian_nlogp, nlogdet, reg_prior

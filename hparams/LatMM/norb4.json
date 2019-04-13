@@ -1,11 +1,11 @@
 {
     "Dir": {
-        "log_root": "results/fashion-mnist/LatMMK5/"
+        "log_root": "results/norb/k6hc64s4LatMM"
     },
     "Glow" : {
-        "image_shape": [32, 32, 1],
-        "hidden_channels": 512,
-        "K": 4,
+        "image_shape": [32, 64, 1],
+        "hidden_channels": 64,
+        "K": 6,
         "L": 3,
         "actnorm_scale": 1.0,
         "flow_permutation": "invconv",
@@ -17,17 +17,19 @@
     },
     "Mixture" : {
         "naive": false,
-        "num_component": 5,
+        "num_component": 4,
         "regulate_std": true,
-        "gam_alpha":2,
-        "gam_beta":1
+        "regulate_mulI": 0,
+        "gam_alpha": 2,
+        "gam_beta": 1
     },
     "Criterion" : {
         "y_condition": "single-class"
     },
     "Data" : {
-        "center_crop": 28,
-        "resize": 32
+        "dataset": "norb",
+        "dataset_root": "/home/doli/datasets/norb/separate",
+        "num_classes": 5
     },
     "Optim": {
         "name": "adam",
@@ -49,13 +51,14 @@
         "data": "cuda:0"
     },
     "Train": {
-        "batch_size": 64,
-        "num_batches": 28500,
+        "batch_size": 256,
+        "num_batches": 4800,
+        "n_epoches": 301,
         "max_grad_clip": 5,
         "max_grad_norm": 100,
-        "max_checkpoints": 5,
-        "checkpoints_gap": 1000,
-        "prior_gap": 5,
+        "max_checkpoints": 100,
+        "checkpoints_gap": 100,
+        "em_gap": 5,
         "num_plot_samples": 1,
         "scalar_log_gap": 50,
         "plot_gap": 50,

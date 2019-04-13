@@ -1,11 +1,11 @@
 {
     "Dir": {
-        "log_root": "results/mnist/k6hc128s1LatMM"
+        "log_root": "results/cifar/k12hc64c1GenMM"
     },
     "Glow" : {
-        "image_shape": [32, 32, 1],
-        "hidden_channels": 128,
-        "K": 6,
+        "image_shape": [32, 32, 3],
+        "hidden_channels": 64,
+        "K": 12,
         "L": 3,
         "actnorm_scale": 1.0,
         "flow_permutation": "invconv",
@@ -16,9 +16,9 @@
         "y_classes": 1
     },
     "Mixture" : {
-        "naive": false,
+        "naive": true,
         "num_component": 1,
-        "regulate_std": true,
+        "regulate_std": false,
         "regulate_mulI": 0,
         "gam_alpha": 2,
         "gam_beta": 1
@@ -27,9 +27,9 @@
         "y_condition": "single-class"
     },
     "Data" : {
-        "dataset": "mnist",
-        "dataset_root": "/home/doli/datasets/mnist/separate/",
-        "num_classes": 10,
+        "dataset": "cifar10",
+        "dataset_root": "/home/doli/datasets/cifar10/separate",
+	"num_classes": 10,
         "resize": 32
     },
     "Optim": {
@@ -52,9 +52,9 @@
         "data": "cuda:0"
     },
     "Train": {
-        "batch_size": 400,
+        "batch_size": 250,
         "num_batches": 4800,
-        "n_epoches": 401,
+        "n_epoches": 400,
         "max_grad_clip": 5,
         "max_grad_norm": 100,
         "max_checkpoints": 100,

@@ -65,7 +65,7 @@ class Trainer(object):
         # self.n_epoches = (hparams.Train.num_batches+len(self.data_loader)-1)
         # self.n_epoches = self.n_epoches // len(self.data_loader)
         self.n_epoches = hparams.Train.n_epoches
-        self.pixel_scale = self.hparams.Data.pixel_scale
+        
         self.global_step = 0
         # lr schedule
         self.lrschedule = lrschedule
@@ -109,8 +109,8 @@ class Trainer(object):
         else:
             with torch.no_grad():
                 z, gaussian_nlogp, nlogdet, reg_prior_logp = self.graph["old"](x=x, y_onehot=y_onehot,regulate_std=self.regulate_std)
-                gaussian_nlogp = gaussian_nlogp * thops.pixels(x)
-                nlogdet = nlogdet * thops.pixels(x)
+                gaussian_nlogp = gaussian_nlogp * thops.all_pixels(x)
+                nlogdet = nlogdet * thops.all_pixels(x)
 
                 nlog_joint_prob = gaussian_nlogp - torch.log(self.graph_prior.unsqueeze(1)+1e-8).to(self.data_device)
 
@@ -123,10 +123,17 @@ class Trainer(object):
 
     def train(self):
         # set old and new to have the same parameters
+        def myRange(start,end,step):
+            i = start
+            while i < end:
+                yield i
+                i += step
+            
+            yield end
         
         self.graph["new"].update_prior(self.graph_prior)
         self.graph["old"].update_prior(self.graph_prior)
-        self.global_step = self.loaded_step
+        start_epoch = self.loaded_step
         
         # set to training state
         for key, graph in self.graph.items():
@@ -138,8 +145,9 @@ class Trainer(object):
 
 
         # begin to train
-        for epoch in range(self.n_epoches):
-            
+        #for epoch in range(self.n_epoches):
+        for epoch in myRange(start_epoch, start_epoch + self.n_epoches, 1):
+   
             try:
                 print("{} at epoch: {}, loss {}, prior {}, prior_in_graph {}".format(os.path.basename(self.hparams.Dir.log_root), epoch, loss.data, self.graph_prior, self.graph["new"].get_prior()))
             except NameError:
@@ -160,7 +168,7 @@ class Trainer(object):
                     self.writer.add_scalar("lr/lr", lr, self.global_step)
                     # get batch data
                 
-                x = batch.to(self.data_device) * self.pixel_scale
+                x = batch.to(self.data_device)
 
                 # batch = {"x": batch[0], "y":batch[1]}
                 # for k in batch:
@@ -186,7 +194,7 @@ class Trainer(object):
                     self.graph["old"](x[:self.batch_size // len(self.devices), ...],
                                       y_onehot[:self.batch_size // len(self.devices), ...] if y_onehot is not None else None)
                     
-                    new2old(global_step=self.global_step,
+                    new2old(global_step=epoch,
                             path=self.log_dir,
                             graph=self.graph,
                             optim=self.optim,
@@ -199,10 +207,10 @@ class Trainer(object):
                 if self.naive:
                     nlog_gamma = self._posterior_computation(x=x, y_onehot=y_onehot)
                     z, nll = self.graph["new"](x=x, y_onehot=y_onehot)
-                    nll = nll * thops.pixels(x)
+                    nll = nll * thops.all_pixels(x)
                     nlog_joint_prob =nll - torch.log(self.graph_prior.unsqueeze(1).expand_as(nll)+1e-6).to(self.data_device)
 
-                    loss_generative = (torch.sum( torch.exp(-nlog_gamma) * nlog_joint_prob) /self.batch_size) / thops.pixels(x)
+                    loss_generative = (torch.sum( torch.exp(-nlog_gamma) * nlog_joint_prob) /self.batch_size) / thops.all_pixels(x)
                     loss = loss_generative
 
                 else:
@@ -210,12 +218,12 @@ class Trainer(object):
                     nlog_gamma = self._posterior_computation(x=x, y_onehot=y_onehot)
                     ##### likelihood computation
                     new_z, new_gaussian_nlogp, new_nlogdet, new_reg_prior_logp = self.graph["new"](x=x, y_onehot=y_onehot,regulate_std=self.regulate_std)
-                    new_gaussian_nlogp = new_gaussian_nlogp * thops.pixels(x)
-                    new_nlogdet = new_nlogdet * thops.pixels(x)
+                    new_gaussian_nlogp = new_gaussian_nlogp * thops.all_pixels(x)
+                    new_nlogdet = new_nlogdet * thops.all_pixels(x)
 
                     new_nlog_joint_prob = new_gaussian_nlogp - torch.log(self.graph_prior.unsqueeze(1)+1e-8).to(self.data_device)
                     
-                    loss_generative = (torch.mean(torch.sum( torch.exp(-nlog_gamma) * new_nlog_joint_prob, dim=0)) + torch.mean(new_nlogdet))/thops.pixels(x)
+                    loss_generative = (torch.mean(torch.sum( torch.exp(-nlog_gamma) * new_nlog_joint_prob, dim=0)) + torch.mean(new_nlogdet))/thops.all_pixels(x)
                     ## Conditional entropy computation
                     if self.regulate_mulI>0:
                         
@@ -226,7 +234,7 @@ class Trainer(object):
                         # new_nlog_gamma = new_delta_nlog_joint_prob + new_tmp_sum.expand_as(new_delta_nlog_joint_prob)
                         new_nlog_gamma = nlog_gamma
                         total_joint_nlog = new_gaussian_nlogp + new_nlogdet - torch.log(self.graph_prior.unsqueeze(1)+1e-8).to(self.data_device)
-                        conditional_entropy = torch.sum((-nlog_gamma) * torch.exp(-total_joint_nlog/thops.pixels(x)) )
+                        conditional_entropy = torch.sum((-nlog_gamma) * torch.exp(-total_joint_nlog/thops.all_pixels(x)) )
                         # fix_point_conditionalH_matrix = torch.exp(-new_nlog_gamma) * ( new_nlog_gamma)
                         # fix_point_conditionalH = torch.sum(fix_point_conditionalH_matrix, dim=0)
                         # px = torch.exp(-new_nlog_joint_prob/thops.pixels(x)).sum(dim=0) * torch.exp(-new_nlogdet/thops.pixels(x))
@@ -279,8 +287,8 @@ class Trainer(object):
                 #          max_checkpoints=self.max_checkpoints)
 
                 # global step
-                if epoch>0:
-                    self.global_step += 1
+                
+                self.global_step += 1
                 # accumulate the posterior of model
                 with torch.no_grad():
                     self.model_prior +=(torch.exp(-nlog_gamma.data) * (1 - self.regulate_mulI * nlog_gamma)).mean(dim=1)
@@ -311,9 +319,9 @@ class Trainer(object):
                     is_best = False
                     print("[{}, {}, NLL computer: No Best update.]".format(os.path.basename(self.hparams.Dir.log_root), epoch))
 
-                self.writer.add_scalar("nll_value/step", my_new_solution_nll, self.global_step)
+                self.writer.add_scalar("nll_value/step", my_new_solution_nll, epoch)
 
-                new2old(global_step=self.global_step,
+                new2old(global_step=epoch,
                         path=self.log_dir,
                         graph=self.graph,
                         optim=self.optim,

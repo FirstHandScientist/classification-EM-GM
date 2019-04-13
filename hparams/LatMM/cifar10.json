@@ -1,10 +1,10 @@
 {
     "Dir": {
-        "log_root": "results/cifar_toytest/"
+        "log_root": "results/cifar/continue_k6hc64LatMM"
     },
-    "Glow" : {
+    "Glow": {
         "image_shape": [32, 32, 3],
-        "hidden_channels": 32,
+        "hidden_channels": 64,
         "K": 6,
         "L": 3,
         "actnorm_scale": 1.0,
@@ -27,7 +27,9 @@
         "y_condition": "single-class"
     },
     "Data" : {
-        "resize": 32
+        "dataset": "cifar10",
+        "dataset_root": "/home/doli/datasets/cifar10/separate",
+        "num_classes": 10
     },
     "Optim": {
         "name": "adam",
@@ -55,7 +57,7 @@
         "max_grad_norm": 100,
         "max_checkpoints": 100,
         "checkpoints_gap": 100,
-        "n_epoches": 200,
+        "n_epoches": 101,
         "em_gap": 5,
         "num_plot_samples": 1,
         "scalar_log_gap": 50,
