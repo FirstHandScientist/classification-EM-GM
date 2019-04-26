@@ -125,6 +125,15 @@ def testing(hparams):
                 dataset_ins = dset.MNIST(root=dataset_root, train=True if "train" == key else False,
                                download=False,
                                transform=transform)
+            elif dataset == "fashion-mnist":
+                transform = transforms.Compose([
+                    transforms.Resize(32),
+                    transforms.ToTensor(),
+                    transforms.Normalize((0.5,), (1,))
+                ])
+                dataset_ins = dset.FashionMNIST(root=dataset_root, train=True if "train" == key else False,
+                               download=False,
+                               transform=transform)
 
             data_loader = DataLoader(dataset_ins,
                              batch_size=batch_size,

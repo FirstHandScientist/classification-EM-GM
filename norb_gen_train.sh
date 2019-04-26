@@ -1,5 +1,12 @@
 #!/bin/bash
 
+python train.py hparams/GenMM/norb10.json
+python mat_acc.py results/norb/k6hc64c10GenMM/norb.json
+
+python train.py hparams/GenMM/norb20.json
+python mat_acc.py results/norb/k6hc64c20GenMM/norb.json
+
+
 # python train.py hparams/GenMM/norb1.json
 # python mat_acc.py results/norb/k6hc64c1GenMM/norb.json
 
@@ -7,12 +14,12 @@
 # python train.py hparams/GenMM/norb2.json
 # python mat_acc.py results/norb/k6hc64c2GenMM/norb.json
 
-python train.py hparams/GenMM/norb3.json
-python train.py hparams/GenMM/norb4.json
+# python train.py hparams/GenMM/norb3.json
+# python train.py hparams/GenMM/norb4.json
 
-python mat_acc.py results/norb/k6hc64c3GenMM/norb.json
+# python mat_acc.py results/norb/k6hc64c3GenMM/norb.json
 
-python mat_acc.py results/norb/k6hc64c4GenMM/norb.json
+# python mat_acc.py results/norb/k6hc64c4GenMM/norb.json
 
 
 # python train.py hparams/LatMM/norb1.json

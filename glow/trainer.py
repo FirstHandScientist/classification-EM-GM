@@ -320,6 +320,8 @@ class Trainer(object):
                     print("[{}, {}, NLL computer: No Best update.]".format(os.path.basename(self.hparams.Dir.log_root), epoch))
 
                 self.writer.add_scalar("nll_value/step", my_new_solution_nll, epoch)
+                for i, value in enumerate(self.model_prior.cpu().data.numpy()):
+                    self.writer.add_scalar("prior{}".format(i), value, epoch)
 
                 new2old(global_step=epoch,
                         path=self.log_dir,

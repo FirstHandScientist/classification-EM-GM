@@ -53,7 +53,7 @@
     "Train": {
         "batch_size": 240,
         "num_batches": 4800,
-        "n_epoches": 201,
+        "n_epoches": 401,
         "max_grad_clip": 5,
         "max_grad_norm": 100,
         "max_checkpoints": 100,

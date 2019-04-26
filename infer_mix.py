@@ -8,7 +8,7 @@ import random
 import torch
 import torchvision.datasets as dset
 import torch
-nimport numpy as np
+import numpy as np
 from docopt import docopt
 from torchvision import transforms
 from glow.builder import build
@@ -66,6 +66,8 @@ if __name__ == "__main__":
         "Failed to find hparams josn `{}`".format(hparams))
     
     hparams = JsonConfig(hparams)
+    hparams.Infer.pre_trained = "results/archive/norb/k6hc64c4GenMM/classfier0/log/trained.pkg"
+    hparams.Infer.pre_trained = "results/norb/testing/trained.pkg"
     batch_size = hparams.Train.batch_size
     builded = build(hparams, False)
     graph = builded["graph"]

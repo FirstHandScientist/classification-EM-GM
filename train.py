@@ -71,7 +71,7 @@ if __name__ == "__main__":
         trainer.train()
 
     # Parallel(n_jobs=10, pre_dispatch="all", backend="threading")(map(delayed(worker), [0]))
-    Parallel(n_jobs=1, pre_dispatch="all", backend="threading")(map(delayed(worker), list(range(hparams.Data.num_classes))))
+    Parallel(n_jobs=2, pre_dispatch="all", backend="threading")(map(delayed(worker), list(range(hparams.Data.num_classes))))
     
     # for the_label in label_list:
         
