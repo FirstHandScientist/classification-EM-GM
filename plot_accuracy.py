@@ -1,7 +1,7 @@
 import pickle
 import os
 import matplotlib.pyplot as plt
-plt.rcParams.update({'font.size': 18})
+plt.rcParams.update({'font.size': 21})
 import numpy as np
 
 def load_obj(name ):
@@ -21,8 +21,8 @@ for name in dataset:
         record = load_obj(name=my_dict[name].format(c))
         
         fig, ax = plt.subplots()
-        ax.plot("step", "train", data=record, linestyle="--", label="Train")
-        ax.plot("step", "test", data=record, label="Test")
+        ax.plot("step", "train", data=record, linewidth=2, linestyle="--", label="Train")
+        ax.plot("step", "test", data=record, linewidth=2,label="Test")
         ax.legend()        
         plt.grid(True)
         plt.tight_layout()

@@ -14,7 +14,7 @@ from glow.builder import build
 from glow.trainer import Trainer
 from glow.config import JsonConfig
 from glow import thops
-from backup_glow.utils import load_obj
+
 from tqdm import tqdm
 import numpy as np
 import pickle
@@ -31,6 +31,11 @@ def load_nll(scalar_dir=None):
     vals = np.array(vals)
     
     return vals.min()
+
+def load_obj(name ):
+    with open(name + '.pkl', 'rb') as f:
+        return pickle.load(f)
+
 
 def nll_scale(dum_dir):
 

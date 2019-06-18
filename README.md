@@ -15,11 +15,6 @@ Algorithm evaluation in our experiment section is done with dataset:
 * Letter
 * Norb
     
-To do test on:
-   
-* MNIST
-* FashionMNIST
-* Cifar10
 
 ## Usage Instruction:
 
