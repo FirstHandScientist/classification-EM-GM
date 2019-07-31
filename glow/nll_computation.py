@@ -68,11 +68,6 @@ class nll_computer(object):
             tmp_nll_result = 0
 
             for i_batch, batch in enumerate(progress):
-                # batch = {"x": batch[0], "y":batch[1]}
-                # for k in batch:
-                #     batch[k] = batch[k].to(self.data_device)
-                
-                # x = batch["x"]
                 x = batch.to(self.data_device)
 
                 y = None
@@ -88,11 +83,6 @@ class nll_computer(object):
                         #testing reverse
                         logp = -(gaussian_nlogp + nlogdet) 
                         logp = logp.cpu().numpy()
-                    #######################nats/pixels#################
-                    # real_p = np.exp(logp) * self.graph.get_prior().numpy()[:, np.newaxis]
-                    # tmp_sum = np.sum(real_p, axis=0)
-                    # loss = np.mean( - np.log(tmp_sum + 1e-6) )
-                    #######################exactly compute#################
                     logp = logp * thops.all_pixels(x)
                     min_logp = logp.mean(axis= 0)
                     delta_logp = logp - min_logp

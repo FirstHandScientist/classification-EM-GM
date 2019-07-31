@@ -156,25 +156,16 @@ if __name__ == "__main__":
     assert os.path.exists(hparams_dir), (
         "Failed to find hparams josn `{}`".format(hparams))
     
-    #WorkDir = "results/FullLatMMcifarH6"
-    #hparams =JsonConfig(os.path.join(WorkDir,"cifar10.json"))
     hparams =JsonConfig(hparams_dir)
-
 
     hparams.Dir.log_root = os.path.dirname(hparams_dir)
     hparams.Dir.classifier_dir = os.path.join(hparams.Dir.log_root,"classfier{}/log")
 
-    #hparams.Data.dataset = "cifar10"
-    #hparams.Dir.dataset_root = "/home/doli/datasets/cifar10"
-    #hparams.Data.num_classes = 10
     log_dir = hparams.Dir.log_root
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    #hparams.dump(log_dir, json_name="cifar10.json")
-
     
     accuracy_dict = testing(hparams)
-
     score_dir = os.path.join(hparams.Dir.log_root, "accuracy.pkl")
     with open(score_dir, "wb") as f:
         pickle.dump(accuracy_dict, f)

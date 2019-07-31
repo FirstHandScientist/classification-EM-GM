@@ -35,14 +35,6 @@ if __name__ == "__main__":
         local_hparams = JsonConfig(hparams_dir)
 
         local_hparams.Dir.log_root = os.path.join(local_hparams.Dir.log_root, "classfier{}".format(label))
-        # warm_start = "results/cifar/k6hc64LatMM/classfier{}/log/save_0k100.pkg".format(label)
-        # warm_start = "results/satimage/k8hc8c3GenMM/classfier{}/log/save_0k200.pkg".format(label)
-
-        # if os.path.exists(warm_start):
-        #     local_hparams.Train.warm_start = warm_start
-        
-        # if os.path.exists( os.path.join(local_hparams.Dir.log_root, "log/trained.pkg")):
-        #     local_hparams.Train.warm_start = os.path.join(local_hparams.Dir.log_root, "log/trained.pkg")
         dataset = load_obj(os.path.join(dataset_root,  "classSets/" +"subset{}".format(label)))
         if True:
             tmp_dataloader = torch.utils.data.DataLoader(dataset, batch_size=64,
@@ -70,8 +62,6 @@ if __name__ == "__main__":
         trainer = Trainer(**built, dataset=dataset, hparams=local_hparams)
         trainer.train()
 
-    # Parallel(n_jobs=10, pre_dispatch="all", backend="threading")(map(delayed(worker), [0]))
+
     Parallel(n_jobs=2, pre_dispatch="all", backend="threading")(map(delayed(worker), list(range(hparams.Data.num_classes))))
     
-    # for the_label in label_list:
-        

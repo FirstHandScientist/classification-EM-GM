@@ -68,11 +68,6 @@ def nll_compute(graph, naive, x):
             #testing reverse
             logp = -(gaussian_nlogp + nlogdet) 
             logp = logp.cpu().numpy()
-            #######################nats/pixels#################
-            # real_p = np.exp(logp) * self.graph.get_prior().numpy()[:, np.newaxis]
-            # tmp_sum = np.sum(real_p, axis=0)
-            # loss = np.mean( - np.log(tmp_sum + 1e-6) )
-            #######################exactly compute#################
         logp = logp * thops.pixels(x)
         #min_logp = logp.min(axis= 0)
         min_logp = logp.mean(axis=0)
@@ -90,16 +85,10 @@ def testing(hparams):
     ####  set data loader
     batch_size = hparams.Train.batch_size
 
-    # step_batches = np.linspace(78*6,
-    #                           hparams.Train.num_batches,
-    #                           78*hparams.Train.em_gap)
-    # step_batches = np.arange(start=132, stop=132*12, step=132)
     step_batches = np.arange(start=0, stop=hparams.Train.n_epoches, step=hparams.Train.em_gap)
 
-    # step_batches = [4290]
     accuracy_dict = {"test":[], "train":[]}
-    # accuracy_dict = {"test":[]}
-    #scaling_nll = nll_scale(hparams.Dir.classifier_dir)
+
     for step in step_batches:
         if step<0:
             continue
@@ -157,7 +146,7 @@ def testing(hparams):
                                       x=x_testing)
                     prediction.append(nll)
 
-                #prediction = torch.stack(prediction)
+
                 prediction = np.array(prediction)
                 prediction[prediction==-np.inf] = np.inf
                 y_predition = prediction.argmin(axis=0)
@@ -181,21 +170,14 @@ if __name__ == "__main__":
     assert os.path.exists(hparams_dir), (
         "Failed to find hparams josn `{}`".format(hparams))
     
-    #WorkDir = "results/FullLatMMcifarH6"
-    #hparams =JsonConfig(os.path.join(WorkDir,"cifar10.json"))
     hparams =JsonConfig(hparams_dir)
-
-
     hparams.Dir.log_root = os.path.dirname(hparams_dir)
     hparams.Dir.classifier_dir = os.path.join(hparams.Dir.log_root,"classfier{}/log")
 
-    #hparams.Data.dataset = "cifar10"
-    #hparams.Dir.dataset_root = "/home/doli/datasets/cifar10"
-    #hparams.Data.num_classes = 10
     log_dir = hparams.Dir.log_root
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    #hparams.dump(log_dir, json_name="cifar10.json")
+
 
     
     accuracy_dict = testing(hparams)
