@@ -1,4 +1,4 @@
-Code is for reproducing experiment (classification part) results
+Code for reproducing experiment (classification part) results of [our paper](https://arxiv.org/abs/1907.13432)
 ===============================================================
 
 ## Requirements:
