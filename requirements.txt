@@ -107,7 +107,7 @@ python-debian==0.1.32
 python-utils==2.3.0
 pytz==2018.5
 pyxdg==0.25
-PyYAML==3.12
+PyYAML==5.4
 pyzmq==17.1.2
 qtconsole==4.4.1
 requests==2.18.4
